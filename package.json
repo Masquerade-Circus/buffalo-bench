@@ -1,0 +1,137 @@
+{
+  "name": "buffalo-bench",
+  "version": "0.0.0",
+  "description": "A benchmarking library that supports async hooks and benchmarks by default.",
+  "source": "lib/index.ts",
+  "main": "dist/index.min.js",
+  "module": "dist/index.min.js",
+  "unpkg": "dist/index.min.js",
+  "browser": "dist/index.min.js",
+  "types": "types/lib/index.d.ts",
+  "repository": "git@github.com:Masquerade-Circus/buffalo-bench.git",
+  "author": "Masquerade <christian@masquerade-circus.net>",
+  "license": "Apache-2.0",
+  "private": false,
+  "files": [
+    "dist",
+    "lib",
+    "register.js"
+  ],
+  "keywords": [
+    "buffalo-bench",
+    "benchmark",
+    "benchmarking",
+    "async",
+    "async-benchmark",
+    "async-benchmarking",
+    "performance",
+    "micro-benchmark",
+    "speed",
+    "perf"
+  ],
+  "scripts": {
+    "dev": "nodemon -e js,ts -w ./bench -w ./lib --exec 'yarn test'",
+    "test": "node ./index.js",
+    "build": "node ./build.js",
+    "remark": "remark . -o",
+    "commit": "git add . && git-cz",
+    "release": "release-it --verbose",
+    "release-test": "release-it --dry-run --verbose"
+  },
+  "dependencies": {
+    "esbuild": "^0.12.19",
+    "pirates": "^4.0.1"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^3.0.1",
+    "@types/node": "^16.4.13",
+    "cz-conventional-changelog": "^3.3.0",
+    "nodemon": "^2.0.12",
+    "release-it": "^14.10.1",
+    "remark-cli": "^10.0.0",
+    "terser": "^5.7.1",
+    "tsc": "^2.0.3",
+    "tsc-prog": "^2.2.1",
+    "typescript": "^4.3.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "release-it": {
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "infile": "CHANGELOG.md",
+        "preset": {
+          "name": "conventionalcommits",
+          "types": [
+            {
+              "type": "feat",
+              "section": "Features"
+            },
+            {
+              "type": "feature",
+              "section": "Features"
+            },
+            {
+              "type": "fix",
+              "section": "Bug Fixes"
+            },
+            {
+              "type": "perf",
+              "section": "Performance Improvements"
+            },
+            {
+              "type": "revert",
+              "section": "Reverts"
+            },
+            {
+              "type": "docs",
+              "section": "Documentation"
+            },
+            {
+              "type": "style",
+              "section": "Styles"
+            },
+            {
+              "type": "chore",
+              "section": "Miscellaneous Chores"
+            },
+            {
+              "type": "refactor",
+              "section": "Code Refactoring"
+            },
+            {
+              "type": "test",
+              "section": "Tests"
+            },
+            {
+              "type": "build",
+              "section": "Build System"
+            },
+            {
+              "type": "ci",
+              "section": "Continuous Integration"
+            }
+          ]
+        }
+      }
+    },
+    "git": {
+      "requireCleanWorkingDir": false
+    },
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "publish": true
+    },
+    "hooks": {
+      "after:@release-it/conventional-changelog": [
+        "yarn remark",
+        "yarn build"
+      ]
+    }
+  }
+}

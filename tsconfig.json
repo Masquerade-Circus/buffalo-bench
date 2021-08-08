@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "esNext",
+    "module": "CommonJS",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "inlineSourceMap": true,
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "removeComments": true,
+    "declaration": true
+  },
+  "include": ["lib/**/*"],
+  "exclude": ["test*/**/*", "**/*.test.ts", "**/*.spec.ts", "bench/**/*", "node_modules/**/*", "types/**/*"]
+}

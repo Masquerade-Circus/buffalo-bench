@@ -1,9 +1,25 @@
-// Create a benchmark runner like Benchmark.js but with a different API.
-// When creating a benchmark, pass a name and the code to run.
-// The code will be wrapped in a function and executed async with `Benchmark.run` in a fresh JavaScript context.
-// This meanTimes that any variables or functions you create will not be shared between your code and the library code.
-// You can optionally pass a second argument to `run` to specify options.
-// The options are the same as those for `Benchmark.options`.
+// A benchmarking library that supports async hooks and benchmarks by default.
+// This library comes by the problem of handling async functions in a way that is compatible with benchmarking.
+// The problem is that async hook are not supported by Benchmark.js
+// For example, the following code will not work as expected:
+
+/*
+  new Benchmark('test', async () => {
+    await doSomething();
+  }, {
+    async: true,
+    async onStart() => {
+      console.log(1);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log(2);
+    },
+  })
+*/
+
+// The previous code will log 1 and then run the benchmark and the log 2 could be logged before the benchmark is finished or could't be logged at all.
+// This problem prevent us to create an async setup and/or teardown for a benchmark like an api call that could require it.
+
+// This library solves this problem by providing a way to create a benchmark with all the hooks and benchmark handled as async by default.
 
 // Simple examples
 // const bench = new Benchmark("name", async () => {});
@@ -11,9 +27,9 @@
 // const bench = new Benchmark("name", {fn: async () => {}, ...options});
 // await bench.run();
 
-// Complex example:
+// Full example:
 // const bench = new Benchmark('myBenchmark', {
-//   maxTime: 5,
+//   maxTime: 5, // In seconds
 //   minSamples: 1,
 //   setup: async () => {
 //     await doSomething();
@@ -47,10 +63,10 @@
 // * `onError`: A function to be run if an error occurs.
 // * `fn`: The function to be run.
 
-// The `Benchmark` constructor returns an object with the following properties:
+// The `Benchmark` instance has the following properties:
 // * `name`: The name of the benchmark.
 // * `error`: The error object if an error occurred.
-// * `cycles`: The number of cycles perforelativeMarginOfErrord.
+// * `cycles`: The number of cycles performed.
 // * `hz`: The number of cycles per second.
 // * `meanTime`: The meanTime time per cycle.
 // * `medianTime`: The medianTime time per cycle.
@@ -63,21 +79,16 @@
 // * `runTime`: The total time taken to run the benchmark, this does not include setup, teardown, onStrart and onComplete hooks.
 // * `totalTime`: The total time taken to run the benchmark including setup, teardown, onStart and onComplete hooks.
 
-// The `Benchmark` object has the following methods:
+// The `Benchmark` instance has the following methods:
 // * `run`: Run the benchmark.
 // * `toJSON`: Return a JSON representation of the benchmark.
 // * `compare`: Compare this benchmark to another.
 
-// The `Benchmark` object has the following static properties:
+// The `Benchmark` class has the following static properties:
 // * `version`: A string containing the library version.
 // * `defaults`: An object containing the default options.
 
-// If the `setup` function returns a promise, the benchmark will wait for the promise to resolve before running
-// If the `teardown` function returns a promise, the benchmark will wait for the promise to resolve before starting
-// If the `fn` function returns a promise, the benchmark will wait for the promise to resolve before continuing
-// If the `onComplete` function returns a promise, the benchmark will wait for the promise to resolve before continuing
-// If the `onStart` function returns a promise, the benchmark will wait for the promise to resolve before continuing
-// If the `onError` function returns a promise, the benchmark will wait for the promise to resolve before continuing
+// If the `setup` `teardown` `onComplete` `onStart` `onError` returns a Promise, the benchmark will wait for the promise to resolve before continuing.
 
 // If the `setup` function throws an error, the benchmark will stop and emit an `SetupError` event.
 // If the `teardown` function throws an error, the benchmark will stop and emit an `TeardownError` event.
@@ -85,6 +96,9 @@
 // If the `onComplete` function throws an error, the benchmark will stop and emit an `CompleteError` event.
 // If the `onStart` function throws an error, the benchmark will stop and emit an `StartError` event.
 // If the `onError` function throws an error, the benchmark will stop and emit an `FatalError` event.
+
+// This errors will be found in the `error` property of the benchmark instance.
+// When converting to JSON, the `errorMessage` property will be a string containing the error message.
 
 import { version } from "../package.json";
 

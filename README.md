@@ -72,10 +72,10 @@ const bench = new Benchmark('myBenchmark', {
   afterEach: async () => {
     await doSomething();
   },
-  onComplete: async () => {
+  before: async () => {
     await doSomething();
   },
-  onStart: async () => {
+  after: async () => {
     await doSomething();
   },
   onError: async (error) => {
@@ -110,8 +110,8 @@ The `Benchmark` constructor takes an `options` object argument with the followin
 * `minSamples`: The minimum number of samples that must be taken.
 * `beforeEach`: A function to be run once before each benchmark loop, does not count for run time.
 * `afterEach`: A function to be run once after each benchmark loop, does not count for run time.
-* `onStart`: A function to be run once before the benchmark loop starts, does not count for run time.
-* `onComplete`: A function to be run once after the benchmark loop finishes, does not count for run time.
+* `before`: A function to be run once before the benchmark loop starts, does not count for run time.
+* `after`: A function to be run once after the benchmark loop finishes, does not count for run time.
 * `onError`: A function to be run if an error occurs.
 * `fn`: The function to be run.
 
@@ -128,8 +128,8 @@ The `Benchmark` instance has the following properties:
 * `times`: An array of times for each cycle.
 * `options`: The options object passed to the constructor.
 * `stamp`: A timestamp representing when the benchmark was created.
-* `runTime`: The total time taken to run the benchmark, this does not include beforeEach, afterEach, onStrart and onComplete hooks.
-* `totalTime`: The total time taken to run the benchmark including beforeEach, afterEach, onStart and onComplete hooks.
+* `runTime`: The total time taken to run the benchmark, this does not include beforeEach, afterEach, before and after hooks.
+* `totalTime`: The total time taken to run the benchmark including beforeEach, afterEach, before and after hooks.
 
 The `Benchmark` instance has the following methods:
 * `run`: Async method that runs the benchmark.
@@ -142,13 +142,13 @@ The `Benchmark` class has the following static properties:
 
 ### Api Notes
 
-If the `beforeEach` `afterEach` `onComplete` `onStart` `onError` returns a Promise, the benchmark will wait for the promise to resolve before continuing.
+If the `beforeEach` `afterEach` `before` `after` `onError` returns a Promise, the benchmark will wait for the promise to resolve before continuing.
 
-If the `beforeEach` function throws an error, the benchmark will stop and emit an `beforeEachError` event.  
-If the `afterEach` function throws an error, the benchmark will stop and emit an `afterEachError` event.  
+If the `beforeEach` function throws an error, the benchmark will stop and emit an `BeforeEachError` event.  
+If the `afterEach` function throws an error, the benchmark will stop and emit an `AfterEachError` event.  
 If the `fn` function throws an error, the benchmark will stop and emit an `RunError` event.  
-If the `onComplete` function throws an error, the benchmark will stop and emit an `CompleteError` event.  
-If the `onStart` function throws an error, the benchmark will stop and emit an `StartError` event.  
+If the `after` function throws an error, the benchmark will stop and emit an `AfterError` event.  
+If the `before` function throws an error, the benchmark will stop and emit an `BeforeError` event.  
 If the `onError` function throws an error, the benchmark will stop and emit an `FatalError` event.  
 
 This errors will be found in the `error` property of the benchmark instance.

@@ -11,8 +11,8 @@ declare type BenchmarkOptions = {
     minSamples: number;
     beforeEach?: () => Promise<void> | void;
     afterEach?: () => Promise<void> | void;
-    onComplete?: () => Promise<void> | void;
-    onStart?: () => Promise<void> | void;
+    after?: () => Promise<void> | void;
+    before?: () => Promise<void> | void;
     onError?: (error: BenchmarkError) => Promise<void> | void;
     fn: BenchmarkFunction;
 };
@@ -103,8 +103,8 @@ declare type SuiteOptions = {
     minSamples: number;
     beforeEach?: (benchmark: Benchmark, i: number) => Promise<void> | void;
     afterEach?: (benchmark: Benchmark, i: number) => Promise<void> | void;
-    onComplete?: () => Promise<void> | void;
-    onStart?: () => Promise<void> | void;
+    after?: () => Promise<void> | void;
+    before?: () => Promise<void> | void;
     onError?: (error: BenchmarkError) => Promise<void> | void;
 };
 interface JsonSuite {
@@ -137,7 +137,7 @@ interface Suite {
     getSortedBenchmarks(sortedBy: CompareBy): Benchmark[];
     getFastest(sortedBy: CompareBy): Benchmark;
     getSlowest(sortedBy: CompareBy): Benchmark;
-    compareFastestWithLowest(compareBy: CompareBy): {
+    compareFastestWithSlowest(compareBy: CompareBy): {
         fastest: Benchmark;
         slowest: Benchmark;
         by: number;

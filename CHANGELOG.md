@@ -1,3 +1,10 @@
+### [1.0.1](https://github.com/Masquerade-Circus/buffalo-bench/compare/1.0.0...1.0.1) (2021-08-09)
+
+
+### Bug Fixes
+
+* **main:** fix method names ([27b2ce7](https://github.com/Masquerade-Circus/buffalo-bench/commit/27b2ce7c50016b7b2daa80d123d4d34fb27a7ec1))
+
 ## [1.0.0](https://github.com/Masquerade-Circus/buffalo-bench/compare/0.1.0...1.0.0) (2021-08-09)
 
 

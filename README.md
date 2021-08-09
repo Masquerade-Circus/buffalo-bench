@@ -35,9 +35,9 @@ For example, the following code will not work as expected:
   })
 ```
 
-The previous code will log `1` and then run the benchmark, and the log `2` could be logged before the benchmark is finished or could't be logged at all.
+The previous code will log `1` and then run the benchmark, and the log `2` could be logged before the benchmark is finished or couldn't be logged at all.
 
-This problem prevent us to create an async setup and/or teardown for a benchmark like an api call that requires opening a db connection, creating a collection, adding a document and launching a server to handle the request. And on the teardown clear the databese, close the connection and stop the server.
+This problem prevent us to create an async onStart and/or onComplete for a benchmark like an api call that requires opening a db connection, creating a collection, adding a document and launching a server to handle the request. And after the benchmark finishes clear the databese, close the connection and stop the server.
 
 So, BuffaloBench solves this problem by providing a way to create a benchmarks with all the hooks handled as async by default. (Also works with sync functions)
 
@@ -66,10 +66,10 @@ await bench.run();
 const bench = new Benchmark('myBenchmark', {
   maxTime: 5, // In seconds
   minSamples: 1,
-  setup: async () => {
+  beforeEach: async () => {
     await doSomething();
   },
-  teardown: async () => {
+  afterEach: async () => {
     await doSomething();
   },
   onComplete: async () => {
@@ -108,8 +108,8 @@ Or you can use it standalone in the browser with:
 The `Benchmark` constructor takes an `options` object argument with the following properties:
 * `maxTime`: The maximum time in seconds that a benchmark can take including hooks.
 * `minSamples`: The minimum number of samples that must be taken.
-* `setup`: A function to be run once before each benchmark loop, does not count for run time.
-* `teardown`: A function to be run once after each benchmark loop, does not count for run time.
+* `beforeEach`: A function to be run once before each benchmark loop, does not count for run time.
+* `afterEach`: A function to be run once after each benchmark loop, does not count for run time.
 * `onStart`: A function to be run once before the benchmark loop starts, does not count for run time.
 * `onComplete`: A function to be run once after the benchmark loop finishes, does not count for run time.
 * `onError`: A function to be run if an error occurs.
@@ -128,8 +128,8 @@ The `Benchmark` instance has the following properties:
 * `times`: An array of times for each cycle.
 * `options`: The options object passed to the constructor.
 * `stamp`: A timestamp representing when the benchmark was created.
-* `runTime`: The total time taken to run the benchmark, this does not include setup, teardown, onStrart and onComplete hooks.
-* `totalTime`: The total time taken to run the benchmark including setup, teardown, onStart and onComplete hooks.
+* `runTime`: The total time taken to run the benchmark, this does not include beforeEach, afterEach, onStrart and onComplete hooks.
+* `totalTime`: The total time taken to run the benchmark including beforeEach, afterEach, onStart and onComplete hooks.
 
 The `Benchmark` instance has the following methods:
 * `run`: Async method that runs the benchmark.
@@ -142,10 +142,10 @@ The `Benchmark` class has the following static properties:
 
 ### Api Notes
 
-If the `setup` `teardown` `onComplete` `onStart` `onError` returns a Promise, the benchmark will wait for the promise to resolve before continuing.
+If the `beforeEach` `afterEach` `onComplete` `onStart` `onError` returns a Promise, the benchmark will wait for the promise to resolve before continuing.
 
-If the `setup` function throws an error, the benchmark will stop and emit an `SetupError` event.  
-If the `teardown` function throws an error, the benchmark will stop and emit an `TeardownError` event.  
+If the `beforeEach` function throws an error, the benchmark will stop and emit an `beforeEachError` event.  
+If the `afterEach` function throws an error, the benchmark will stop and emit an `afterEachError` event.  
 If the `fn` function throws an error, the benchmark will stop and emit an `RunError` event.  
 If the `onComplete` function throws an error, the benchmark will stop and emit an `CompleteError` event.  
 If the `onStart` function throws an error, the benchmark will stop and emit an `StartError` event.  

@@ -9,8 +9,8 @@ declare type BenchmarkFunction = () => Promise<void | any> | void | any;
 declare type BenchmarkOptions = {
     maxTime: number;
     minSamples: number;
-    setup?: () => Promise<void> | void;
-    teardown?: () => Promise<void> | void;
+    beforeEach?: () => Promise<void> | void;
+    afterEach?: () => Promise<void> | void;
     onComplete?: () => Promise<void> | void;
     onStart?: () => Promise<void> | void;
     onError?: (error: BenchmarkError) => Promise<void> | void;
@@ -30,11 +30,22 @@ interface JsonBenchmark {
     totalTime: number;
     samples: number;
 }
-declare type CompareBy = "meanTime" | "medianTime" | "standardDeviation" | "maxTime" | "minTime" | "hz" | "runTime" | "cycles" | "percent";
+export declare const enum CompareBy {
+    MeanTime = "meanTime",
+    MedianTime = "medianTime",
+    StandardDeviation = "standardDeviation",
+    MaxTime = "maxTime",
+    MinTime = "minTime",
+    Hz = "hz",
+    RunTime = "runTime",
+    Cycles = "cycles",
+    Percent = "percent"
+}
 declare type BenchmarkConstructor = (name: string, optionsOrFn: (Partial<BenchmarkOptions> & {
     fn: BenchmarkFunction;
 }) | BenchmarkFunction, options: Partial<BenchmarkOptions>) => Benchmark;
 interface Benchmark {
+    Suite: typeof Suite;
     readonly version: string;
     readonly defaults: {
         maxTime: number;
@@ -58,9 +69,10 @@ interface Benchmark {
     constructor: BenchmarkConstructor;
     run(): Promise<void>;
     toJSON(): JsonBenchmark;
-    compare(other: Benchmark, compare: CompareBy): number;
+    compareWith(other: Benchmark, compareBy: CompareBy): number;
 }
 declare class Benchmark implements Benchmark {
+    static Suite: typeof Suite;
     static readonly version: string;
     static readonly defaults: {
         maxTime: number;
@@ -84,7 +96,66 @@ declare class Benchmark implements Benchmark {
     constructor(name: string, optionsOrFn: (Partial<BenchmarkOptions> & {
         fn: BenchmarkFunction;
     }) | BenchmarkFunction, options?: Partial<BenchmarkOptions>);
-    private runCallback;
-    runSample(functionToBenchCleaned: Function): Promise<void>;
+    runSample(): Promise<void>;
+}
+declare type SuiteOptions = {
+    maxTime: number;
+    minSamples: number;
+    beforeEach?: (benchmark: Benchmark, i: number) => Promise<void> | void;
+    afterEach?: (benchmark: Benchmark, i: number) => Promise<void> | void;
+    onComplete?: () => Promise<void> | void;
+    onStart?: () => Promise<void> | void;
+    onError?: (error: BenchmarkError) => Promise<void> | void;
+};
+interface JsonSuite {
+    name: string;
+    errorMessage?: string;
+    runTime: number;
+    totalTime: number;
+    passed: boolean;
+    benchmarks: JsonBenchmark[];
+}
+declare type SuiteConstructor = (name: string, options?: Partial<SuiteOptions>) => Suite;
+interface Suite {
+    readonly defaults: {
+        maxTime: number;
+        minSamples: number;
+    };
+    name: string;
+    error?: BenchmarkError;
+    options: SuiteOptions;
+    stamp: number;
+    runTime: number;
+    totalTime: number;
+    benchmarks: Benchmark[];
+    constructor: SuiteConstructor;
+    add(name: string, optionsOrFn: (Partial<BenchmarkOptions> & {
+        fn: BenchmarkFunction;
+    }) | BenchmarkFunction, options: Partial<BenchmarkOptions>): Benchmark;
+    toJSON(): JsonSuite;
+    run(): Promise<void>;
+    getSortedBenchmarks(sortedBy: CompareBy): Benchmark[];
+    getFastest(sortedBy: CompareBy): Benchmark;
+    getSlowest(sortedBy: CompareBy): Benchmark;
+    compareFastestWithLowest(compareBy: CompareBy): {
+        fastest: Benchmark;
+        slowest: Benchmark;
+        by: number;
+    };
+}
+declare class Suite implements Suite {
+    static readonly defaults: {
+        maxTime: number;
+        minSamples: number;
+    };
+    name: string;
+    error?: BenchmarkError;
+    options: SuiteOptions;
+    stamp: number;
+    runTime: number;
+    totalTime: number;
+    benchmarks: Benchmark[];
+    constructor(name: string, options?: Partial<SuiteOptions>);
+    getSortedBenchmarksBy(sortBy: CompareBy): Benchmark[];
 }
 export default Benchmark;

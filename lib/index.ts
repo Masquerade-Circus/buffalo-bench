@@ -102,7 +102,7 @@
 
 import { version } from "../package.json";
 
-declare const performance: any;
+let now = typeof performance === "undefined" ? () => Date.now() : () => performance.now();
 
 //*** Errors ***//
 
@@ -112,6 +112,7 @@ abstract class BenchmarkError extends Error {
   readonly message: string;
   readonly name: string;
   statusCode = 0;
+  [key: string]: any;
 
   constructor(message = "Something went wrong", code?: string) {
     super();
@@ -257,6 +258,11 @@ interface Benchmark {
 function getError(error: Error, message: string, type: ErrorType): BenchmarkError {
   let benchmarkError = new Errors[type](message);
   benchmarkError.stack = error.stack;
+  for (let i in error) {
+    if (error.hasOwnProperty(i)) {
+      benchmarkError[i] = (error as any)[i];
+    }
+  }
   return benchmarkError;
 }
 
@@ -359,15 +365,15 @@ class Benchmark implements Benchmark {
 
     switch (compareBy) {
       case "meanTime":
-        return meanTime - other.meanTime;
+        return other.meanTime - meanTime;
       case "medianTime":
-        return medianTime - other.medianTime;
+        return other.medianTime - medianTime;
       case "standardDeviation":
         return standardDeviation - other.standardDeviation;
       case "maxTime":
         return maxTime - other.maxTime;
       case "minTime":
-        return minTime - other.minTime;
+        return other.minTime - minTime;
       case "hz":
         return hz - other.hz;
       case "runTime":
@@ -375,7 +381,7 @@ class Benchmark implements Benchmark {
       case "cycles":
         return cycles - other.cycles;
       case "percent":
-        return Math.trunc((100 / other.hz) * hz - 100);
+        return Math.trunc(((100 / meanTime) * other.meanTime - 100) * 100) / 100;
       default:
         throw new Error(`Unknown compare field: ${compareBy}`);
     }
@@ -384,10 +390,10 @@ class Benchmark implements Benchmark {
   async runSample() {
     const { beforeEach, afterEach, fn } = this.options;
     let sampleMaxTime = 1000;
-    let startTime = performance.now();
+    let startTime = now();
 
-    while (performance.now() - startTime < sampleMaxTime) {
-      const startCycleTime = performance.now();
+    while (now() - startTime < sampleMaxTime) {
+      const startCycleTime = now();
       this.cycles++;
       const BeforeEachError = await runCallback(this, "BeforeEachError", beforeEach);
       if (BeforeEachError) {
@@ -397,13 +403,13 @@ class Benchmark implements Benchmark {
       let time;
       try {
         if (isAsync(fn)) {
-          let start = performance.now();
+          let start = now();
           await fn();
-          time = performance.now() - start;
+          time = now() - start;
         } else {
-          let start = performance.now();
+          let start = now();
           fn();
-          time = performance.now() - start;
+          time = now() - start;
         }
       } catch (error) {
         throw getError(error, `Benchmark \`${this.name}\` failed to run \`fn\`: ${error.message}`, "RunError");
@@ -417,14 +423,14 @@ class Benchmark implements Benchmark {
         throw AfterEachError;
       }
 
-      this.totalTime += performance.now() - startCycleTime;
+      this.totalTime += now() - startCycleTime;
     }
   }
 
   // Run the benchmark.
   async run(): Promise<void> {
-    this.stamp = performance.now();
-    const { maxTime, minSamples, after, before, onError, fn } = this.options;
+    this.stamp = now();
+    const { maxTime, minSamples, after, before, onError } = this.options;
     let maxTimeInMilliseconds = maxTime * 1000;
 
     try {
@@ -513,7 +519,7 @@ interface Suite {
   toJSON(): JsonSuite;
   run(): Promise<void>;
 
-  getSortedBenchmarks(sortedBy: CompareBy): Benchmark[];
+  getSortedBenchmarksBy(sortedBy: CompareBy): Benchmark[];
   getFastest(sortedBy: CompareBy): Benchmark;
   getSlowest(sortedBy: CompareBy): Benchmark;
   compareFastestWithSlowest(compareBy: CompareBy): { fastest: Benchmark; slowest: Benchmark; by: number };
@@ -550,7 +556,7 @@ class Suite implements Suite {
       runTime,
       totalTime,
       passed: !error,
-      benchmarks: this.benchmarks.map((benchmark) => benchmark.toJSON())
+      benchmarks: this.getSortedBenchmarksBy(CompareBy.MeanTime).map((benchmark) => benchmark.toJSON())
     };
   }
 
@@ -581,7 +587,7 @@ class Suite implements Suite {
   }
 
   async run(): Promise<void> {
-    this.stamp = performance.now();
+    this.stamp = now();
     const { beforeEach, afterEach, after, before, onError } = this.options;
 
     try {
@@ -642,8 +648,9 @@ class Suite implements Suite {
   }
 
   compareFastestWithSlowest(compareBy: CompareBy) {
-    const fastest = this.getFastest(compareBy);
-    const slowest = this.getSlowest(compareBy);
+    let sortBy = compareBy === CompareBy.Percent ? CompareBy.MeanTime : compareBy;
+    const fastest = this.getFastest(sortBy);
+    const slowest = this.getSlowest(sortBy);
 
     return {
       fastest,

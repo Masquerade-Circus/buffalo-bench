@@ -1,3 +1,10 @@
+### [1.0.2](https://github.com/Masquerade-Circus/buffalo-bench/compare/1.0.1...1.0.2) (2021-08-10)
+
+
+### Code Refactoring
+
+* **main:** minor fixes and improvements ([1f7e341](https://github.com/Masquerade-Circus/buffalo-bench/commit/1f7e341cf3eb883e857c2f2fe9f8023c851f6570))
+
 ### [1.0.1](https://github.com/Masquerade-Circus/buffalo-bench/compare/1.0.0...1.0.1) (2021-08-09)
 
 

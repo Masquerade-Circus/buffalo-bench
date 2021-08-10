@@ -3,6 +3,7 @@ declare abstract class BenchmarkError extends Error {
     readonly message: string;
     readonly name: string;
     statusCode: number;
+    [key: string]: any;
     constructor(message?: string, code?: string);
 }
 declare type BenchmarkFunction = () => Promise<void | any> | void | any;
@@ -134,7 +135,7 @@ interface Suite {
     }) | BenchmarkFunction, options: Partial<BenchmarkOptions>): Benchmark;
     toJSON(): JsonSuite;
     run(): Promise<void>;
-    getSortedBenchmarks(sortedBy: CompareBy): Benchmark[];
+    getSortedBenchmarksBy(sortedBy: CompareBy): Benchmark[];
     getFastest(sortedBy: CompareBy): Benchmark;
     getSlowest(sortedBy: CompareBy): Benchmark;
     compareFastestWithSlowest(compareBy: CompareBy): {
@@ -156,6 +157,5 @@ declare class Suite implements Suite {
     totalTime: number;
     benchmarks: Benchmark[];
     constructor(name: string, options?: Partial<SuiteOptions>);
-    getSortedBenchmarksBy(sortBy: CompareBy): Benchmark[];
 }
 export default Benchmark;

@@ -280,7 +280,7 @@ async function runCallback(
   if (callback) {
     try {
       await callback.bind(instance)(...args);
-    } catch (error) {
+    } catch (error: any) {
       return getError(error, `Benchmark \`${instance.name}\` failed to run \`${callback.name}\` callback: ${error.message}`, errorTypeIfAny);
     }
   }
@@ -411,7 +411,7 @@ class Benchmark implements Benchmark {
           fn();
           time = now() - start;
         }
-      } catch (error) {
+      } catch (error: any) {
         throw getError(error, `Benchmark \`${this.name}\` failed to run \`fn\`: ${error.message}`, "RunError");
       }
 
@@ -460,7 +460,7 @@ class Benchmark implements Benchmark {
       if (afterError) {
         throw afterError;
       }
-    } catch (error) {
+    } catch (error: any) {
       this.error = error;
 
       const onErrorError = await runCallback(this, "FatalError", onError, error);
@@ -617,7 +617,7 @@ class Suite implements Suite {
       if (afterError) {
         throw afterError;
       }
-    } catch (error) {
+    } catch (error: any) {
       this.error = error;
 
       const onErrorError = await runCallback(this, "FatalError", onError, error);

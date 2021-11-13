@@ -1,6 +1,6 @@
 {
   "name": "buffalo-bench",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A benchmarking library that supports async hooks and benchmarks by default.",
   "source": "lib/index.ts",
   "main": "dist/index.min.js",

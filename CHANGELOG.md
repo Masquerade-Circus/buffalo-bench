@@ -1,3 +1,10 @@
+### [1.0.3](https://github.com/Masquerade-Circus/buffalo-bench/compare/1.0.2...1.0.3) (2021-11-13)
+
+
+### Styles
+
+* update dependencies. Update documentation ([b4ef6fd](https://github.com/Masquerade-Circus/buffalo-bench/commit/b4ef6fd7e63549ad51a39138271beb4228c77284))
+
 ### [1.0.2](https://github.com/Masquerade-Circus/buffalo-bench/compare/1.0.1...1.0.2) (2021-08-10)
 
 

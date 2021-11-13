@@ -39,20 +39,20 @@
     "release-test": "release-it --dry-run --verbose"
   },
   "dependencies": {
-    "esbuild": "^0.12.19",
+    "esbuild": "^0.13.13",
     "pirates": "^4.0.1"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^3.0.1",
-    "@types/node": "^16.4.13",
+    "@release-it/conventional-changelog": "^3.3.0",
+    "@types/node": "^16.11.7",
     "cz-conventional-changelog": "^3.3.0",
-    "nodemon": "^2.0.12",
-    "release-it": "^14.10.1",
+    "nodemon": "^2.0.15",
+    "release-it": "^14.11.6",
     "remark-cli": "^10.0.0",
-    "terser": "^5.7.1",
+    "terser": "^5.9.0",
     "tsc": "^2.0.3",
     "tsc-prog": "^2.2.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.4"
   },
   "config": {
     "commitizen": {

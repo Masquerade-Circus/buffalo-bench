@@ -90,6 +90,42 @@ const bench = new Benchmark('myBenchmark', {
 await bench.run();
 ```
 
+### Suite example: 
+```js
+let suite = new Benchmark.Suite("String comparison", {
+  beforeEach(benchmark) {
+    console.log(`${this.name}: ${benchmark.name}: Start`);
+  },
+  afterEach(benchmark) {
+    console.log(`${this.name}: ${benchmark.name}: End`);
+  }
+});
+suite.add("Direct comparison", () => "Hello World!" === "Hello World!");
+suite.add("Regexp comparison", () => new RegExp("Hello World!").test("Hello World!"));
+suite.add("IndexOf comparison", () => "Hello World!".indexOf("Hello World!"));
+suite.add("Complex comparison", () => {
+  let str = "Hello World!";
+  let str2 = "Hello World!";
+  let l = str.length;
+  str.length === str2.length && str[0] === str2[0] && str[l - 1] === str2[l - 1] && str === str2;
+});
+
+await suite.run();
+
+// String comparison: Direct comparison: Start
+// String comparison: Direct comparison: End
+// String comparison: Regexp comparison: Start
+// String comparison: Regexp comparison: End
+// String comparison: IndexOf comparison: Start
+// String comparison: IndexOf comparison: End
+// String comparison: Complex comparison: Start
+// String comparison: Complex comparison: End
+
+let result = suite.compareFastestWithSlowest('percent');
+console.log(result.fastest.name + " is faster than " + result.slowest.name + " by " + result.by + "%"); 
+// Direct comparison is faster than Regexp comparison by 281.47%
+```
+
 ## Installation
 You can get this library as a [Node.js](https://nodejs.org/en/) module available through the [npm registry](https://www.npmjs.com/):
 
@@ -119,6 +155,7 @@ The `Benchmark` instance has the following properties:
 * `name`: The name of the benchmark.
 * `error`: The error object if an error occurred.
 * `cycles`: The number of cycles performed.
+* `samples`: The number of samples taken.
 * `hz`: The number of cycles per second.
 * `meanTime`: The meanTime time per cycle.
 * `medianTime`: The medianTime time per cycle.
@@ -132,13 +169,52 @@ The `Benchmark` instance has the following properties:
 * `totalTime`: The total time taken to run the benchmark including beforeEach, afterEach, before and after hooks.
 
 The `Benchmark` instance has the following methods:
-* `run`: Async method that runs the benchmark.
-* `toJSON`: Return a JSON representation of the benchmark.
-* `compare`: Compare this benchmark to another.
+* `run()`: Async method that runs the benchmark.
+* `toJSON()`: Return a JSON representation of the benchmark.
+* `compareWith(other: Benchmark, compareBy: CompareBy)`: Compare this benchmark to the other benchmark and return a number representing the difference of the `CompareBy` metric between the two benchmarks.
 
 The `Benchmark` class has the following static properties:
 * `version`: A string containing the library version.
 * `defaults`: An object containing the default options.
+* `Suite`: A class that represents a suite of benchmarks.
+
+The `Suite` constructor takes a `name` and an `options` object argument with the following properties:
+* `maxTime`: The maximum time in seconds that a benchmark can take including hooks.
+* `minSamples`: The minimum number of samples that must be taken.
+* `beforeEach`: A function to be run once before each benchmark run, does not count for run time.
+* `afterEach`: A function to be run once after each benchmark run, does not count for run time.
+* `before`: A function to be run once before the benchmark run starts, does not count for run time.
+* `after`: A function to be run once after the benchmark run finishes, does not count for run time.
+* `onError`: A function to be run if an error occurs.
+
+The `Suite` instance has the following properties:
+* `name`: The name of the suite.
+* `error`: The error object if an error occurred.
+* `options`: The options object passed to the constructor.
+* `stamp`: A timestamp representing when the suite was created.
+* `runTime`: The total time taken to run the suite, this does not include beforeEach, afterEach, before and after hooks.
+* `totalTime`: The total time taken to run the suite including beforeEach, afterEach, before and after hooks.
+* `benchmarks`: An array of the benchmarks in the suite.
+
+The `Suite` instance has the following methods:
+* `add(name: string, optionsOrFn: BenchmarkOptions | Function, options?: BenchmarkOptions)`: Add a benchmark to the suite.
+* `getSortedBenchmarksBy(sortedBy: CompareBy)`: Get the benchmarks sorted by a given `CompareBy` metric.
+* `getFastest(sortedBy: CompareBy)`: Get the fastest benchmark in the suite sorting by the given `CompareBy` metric.
+* `getSlowest(sortedBy: CompareBy)`: Get the slowest benchmark in the suite sorting by the given `CompareBy` metric.
+* `CompareFastestWithSlowest(compareBy: CompareBy)`: Compare the fastest benchmark with the slowest benchmark sorting by the given `CompareBy` metric.
+* `run`: Async method that runs the suite.
+* `toJSON`: Return a JSON representation of the suite.
+
+The `CompareBy` enum has the following values:
+* `meanTime`: Compare by the mean time per cycle.
+* `medianTime`: Compare by the median time per cycle.
+* `standardDeviation`: Compare by the standard deviation.
+* `maxTime`: Compare by the maximum time.
+* `minTime`: Compare by the minimum time.
+* `hz`: Compare by the number of cycles per second.
+* `runTime`: Compare by the total time taken to run the suite.
+* `cycles`: Compare by the number of cycles.
+* `percent`: Compare by the percentage of cycles that were slower than the fastest benchmark.
 
 ### Api Notes
 

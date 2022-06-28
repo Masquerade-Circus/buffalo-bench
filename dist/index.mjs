@@ -11,7 +11,7 @@ var __publicField = (obj, key, value) => {
 };
 
 // lib/index.ts
-var version = "1.0.3";
+var version = "2.0.0";
 var now = typeof performance === "undefined" ? () => Date.now() : () => performance.now();
 var BenchmarkError = class extends Error {
   code;

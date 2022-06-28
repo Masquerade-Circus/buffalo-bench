@@ -100,7 +100,7 @@
 // This errors will be found in the `error` property of the benchmark instance.
 // When converting to JSON, the `errorMessage` property will be a string containing the error message.
 
-const version = "1.1.0";
+const version = "2.0.0";
 
 let now =
   typeof performance === "undefined"

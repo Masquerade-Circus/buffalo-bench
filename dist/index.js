@@ -29,7 +29,7 @@ __export(lib_exports, {
   CompareBy: () => CompareBy
 });
 module.exports = __toCommonJS(lib_exports);
-var version = "1.0.3";
+var version = "2.0.0";
 var now = typeof performance === "undefined" ? () => Date.now() : () => performance.now();
 var BenchmarkError = class extends Error {
   code;

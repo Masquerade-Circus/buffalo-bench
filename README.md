@@ -45,7 +45,7 @@ So, BuffaloBench solves this problem by providing a way to create a benchmarks w
 
 ### Simple example
 ```js
-const Benchmark = require('buffalo-bench');
+const { Benchmark } = require('buffalo-bench');
 
 // Create a benchmark only with name and function
 const bench = new Benchmark("name", async () => {});
@@ -62,6 +62,8 @@ await bench.run();
 
 ### Full example:
 ```js
+const { Benchmark } = require('buffalo-bench');
+
 // Create a benchmark with all the options
 const bench = new Benchmark('myBenchmark', {
   maxTime: 5, // In seconds
@@ -92,6 +94,8 @@ await bench.run();
 
 ### Suite example: 
 ```js
+const { Benchmark } = require('buffalo-bench');
+
 let suite = new Benchmark.Suite("String comparison", {
   beforeEach(benchmark) {
     console.log(`${this.name}: ${benchmark.name}: Start`);
@@ -201,7 +205,7 @@ The `Suite` instance has the following methods:
 * `getSortedBenchmarksBy(sortedBy: CompareBy)`: Get the benchmarks sorted by a given `CompareBy` metric.
 * `getFastest(sortedBy: CompareBy)`: Get the fastest benchmark in the suite sorting by the given `CompareBy` metric.
 * `getSlowest(sortedBy: CompareBy)`: Get the slowest benchmark in the suite sorting by the given `CompareBy` metric.
-* `CompareFastestWithSlowest(compareBy: CompareBy)`: Compare the fastest benchmark with the slowest benchmark sorting by the given `CompareBy` metric.
+* `compareFastestWithSlowest(compareBy: CompareBy)`: Compare the fastest benchmark with the slowest benchmark sorting by the given `CompareBy` metric.
 * `run`: Async method that runs the suite.
 * `toJSON`: Return a JSON representation of the suite.
 
@@ -232,17 +236,17 @@ When converting to JSON, the `errorMessage` property will be a string containing
 
 ## Using typescript 
 
-If you want to write your benchmarks with typescript, you can use the library as it is by requiring in your project the `buffalo-bench/register` file.
+If you want to write your benchmarks with typescript, you must install the `ts-node` library and require in your project the `ts-node/register` file.
 
 Example: 
 
 ```js
-require('buffalo-bench/register');
-require('./my-benchmark.ts');)
+require('ts-node/register');
+require('./my-benchmark.ts');
 ```
 
 ```ts
-import Benchmark from 'buffalo-bench';
+import { Benchmark } from 'buffalo-bench/lib';
 
 const bench = new Benchmark('myBenchmark', () => {});
 (async () => {
@@ -251,15 +255,11 @@ const bench = new Benchmark('myBenchmark', () => {});
 })();
 ```
 
-This register file uses the `eslint` and `pirates` modules to transpile the typescript code to javascript on the fly.
-
-Take into account that this will not check the typescript code for errors. If you want to check your typescript code, you can must use the `tsc` package.
-
 ## Development and Build
 
--   Use `yarn dev` to watch and compile the library on every change to it running the benchmarks in the bench folder.
+-   Use `yarn dev` to watch and compile the library on every change to it running the index.ts benchmark in the tests folder.
 -   Use `yarn build` to build the library. 
--  Use `yarn commit` to commit your changes.
+-   Use `yarn commit` to commit your changes.
 
 ## Contributing
 

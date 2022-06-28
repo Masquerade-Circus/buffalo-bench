@@ -100,9 +100,12 @@
 // This errors will be found in the `error` property of the benchmark instance.
 // When converting to JSON, the `errorMessage` property will be a string containing the error message.
 
-import { version } from '../package.json';
+const version = "1.1.0";
 
-let now = typeof performance === 'undefined' ? () => Date.now() : () => performance.now();
+let now =
+  typeof performance === "undefined"
+    ? () => Date.now()
+    : () => performance.now();
 
 //*** Errors ***//
 
@@ -114,7 +117,7 @@ abstract class BenchmarkError extends Error {
   statusCode = 0;
   [key: string]: any;
 
-  constructor(message = 'Something went wrong', code?: string) {
+  constructor(message = "Something went wrong", code?: string) {
     super();
     this.message = message;
     this.code = code;
@@ -125,37 +128,37 @@ abstract class BenchmarkError extends Error {
 //  BeforeEachError: The `beforeEach` function threw an error.
 class BeforeEachError extends BenchmarkError {
   statusCode = 1;
-  name = 'BeforeEachError';
+  name = "BeforeEachError";
 }
 
 //  AfterEachError: The `afterEach` function threw an error.
 class AfterEachError extends BenchmarkError {
   statusCode = 2;
-  name = 'AfterEachError';
+  name = "AfterEachError";
 }
 
 //  RunError: The `fn` function threw an error.
 class RunError extends BenchmarkError {
   statusCode = 3;
-  name = 'RunError';
+  name = "RunError";
 }
 
 //  AfterError: The `after` function threw an error.
 class AfterError extends BenchmarkError {
   statusCode = 4;
-  name = 'AfterError';
+  name = "AfterError";
 }
 
 //  BeforeError: The `before` function threw an error.
 class BeforeError extends BenchmarkError {
   statusCode = 5;
-  name = 'BeforeError';
+  name = "BeforeError";
 }
 
 //  FatalError: The `onError` function threw an error.
 class FatalError extends BenchmarkError {
   statusCode = 7;
-  name = 'FatalError';
+  name = "FatalError";
 }
 
 const Errors = {
@@ -168,7 +171,13 @@ const Errors = {
   FatalError
 };
 
-type ErrorType = 'BeforeEachError' | 'AfterEachError' | 'RunError' | 'AfterError' | 'BeforeError' | 'FatalError';
+type ErrorType =
+  | "BeforeEachError"
+  | "AfterEachError"
+  | "RunError"
+  | "AfterError"
+  | "BeforeError"
+  | "FatalError";
 
 // BenchmarkFunction a function that can be used as a benchmark.
 type BenchmarkFunction = () => Promise<void | any> | void | any;
@@ -180,15 +189,15 @@ type BenchmarkOptions = {
   // The minimum number of samples that must be taken.
   minSamples: number;
   // A function to be run once before each benchmark loop, does not count for run time.
-  beforeEach?: () => Promise<void> | void;
+  beforeEach?: (this: Benchmark) => Promise<void> | void;
   // A function to be run once after each benchmark loop, does not count for run time.
-  afterEach?: () => Promise<void> | void;
+  afterEach?: (this: Benchmark) => Promise<void> | void;
   // A function to be run once after the benchmark completes, does not count for run time.
-  after?: () => Promise<void> | void;
+  after?: (this: Benchmark) => Promise<void> | void;
   // A function to be run once before the benchmark starts, does not count for run time.
-  before?: () => Promise<void> | void;
+  before?: (this: Benchmark) => Promise<void> | void;
   // A function to be run if an error occurs.
-  onError?: (error: BenchmarkError) => Promise<void> | void;
+  onError?: (this: Benchmark, error: BenchmarkError) => Promise<void> | void;
   // The function to be run.
   fn: BenchmarkFunction;
 };
@@ -209,24 +218,26 @@ interface JsonBenchmark {
 }
 
 export const enum CompareBy {
-  MeanTime = 'meanTime',
-  MedianTime = 'medianTime',
-  StandardDeviation = 'standardDeviation',
-  MaxTime = 'maxTime',
-  MinTime = 'minTime',
-  Hz = 'hz',
-  RunTime = 'runTime',
-  Cycles = 'cycles',
-  Percent = 'percent'
+  MeanTime = "meanTime",
+  MedianTime = "medianTime",
+  StandardDeviation = "standardDeviation",
+  MaxTime = "maxTime",
+  MinTime = "minTime",
+  Hz = "hz",
+  RunTime = "runTime",
+  Cycles = "cycles",
+  Percent = "percent"
 }
 
 type BenchmarkConstructor = (
   name: string,
-  optionsOrFn: (Partial<BenchmarkOptions> & { fn: BenchmarkFunction }) | BenchmarkFunction,
+  optionsOrFn:
+    | (Partial<BenchmarkOptions> & { fn: BenchmarkFunction })
+    | BenchmarkFunction,
   options: Partial<BenchmarkOptions>
 ) => Benchmark;
 
-interface Benchmark {
+export interface Benchmark {
   Suite: typeof Suite;
   readonly version: string;
   readonly defaults: {
@@ -255,7 +266,11 @@ interface Benchmark {
 }
 
 // helper to get the correct error type from a normal error
-function getError(error: Error, message: string, type: ErrorType): BenchmarkError {
+function getError(
+  error: Error,
+  message: string,
+  type: ErrorType
+): BenchmarkError {
   let benchmarkError = new Errors[type](message);
   benchmarkError.stack = error.stack;
   for (let i in error) {
@@ -268,7 +283,7 @@ function getError(error: Error, message: string, type: ErrorType): BenchmarkErro
 
 // helper function to know if a function is async or not
 function isAsync(fn: BenchmarkFunction): boolean {
-  return fn.constructor.name === 'AsyncFunction';
+  return fn.constructor.name === "AsyncFunction";
 }
 
 async function runCallback(
@@ -283,7 +298,9 @@ async function runCallback(
     } catch (error) {
       return getError(
         error as Error,
-        `Benchmark \`${instance.name}\` failed to run \`${callback.name}\` callback: ${(error as Error).message}`,
+        `Benchmark \`${instance.name}\` failed to run \`${
+          callback.name
+        }\` callback: ${(error as Error).message}`,
         errorTypeIfAny
       );
     }
@@ -291,7 +308,7 @@ async function runCallback(
 }
 
 // The benchmark class
-class Benchmark implements Benchmark {
+export class Benchmark implements Benchmark {
   static Suite: typeof Suite;
   static readonly version: string = version;
   static readonly defaults: {
@@ -318,14 +335,20 @@ class Benchmark implements Benchmark {
   runTime: number = 0;
   totalTime: number = 0;
 
-  constructor(name: string, optionsOrFn: (Partial<BenchmarkOptions> & { fn: BenchmarkFunction }) | BenchmarkFunction, options: Partial<BenchmarkOptions> = {}) {
+  constructor(
+    name: string,
+    optionsOrFn:
+      | (Partial<BenchmarkOptions> & { fn: BenchmarkFunction })
+      | BenchmarkFunction,
+    options: Partial<BenchmarkOptions> = {}
+  ) {
     this.name = name;
     let opts = {
       ...Benchmark.defaults,
       ...options
     } as BenchmarkOptions;
 
-    if (typeof optionsOrFn === 'function') {
+    if (typeof optionsOrFn === "function") {
       opts.fn = optionsOrFn;
     } else {
       opts = {
@@ -338,7 +361,20 @@ class Benchmark implements Benchmark {
   }
 
   toJSON(): JsonBenchmark {
-    const { name, error, cycles, hz, runTime, totalTime, samples, meanTime, medianTime, standardDeviation, maxTime, minTime } = this;
+    const {
+      name,
+      error,
+      cycles,
+      hz,
+      runTime,
+      totalTime,
+      samples,
+      meanTime,
+      medianTime,
+      standardDeviation,
+      maxTime,
+      minTime
+    } = this;
 
     return {
       name,
@@ -356,8 +392,21 @@ class Benchmark implements Benchmark {
     };
   }
 
-  compareWith(other: Benchmark, compareBy: CompareBy = CompareBy.Percent): number {
-    const { error, cycles, hz, meanTime, medianTime, standardDeviation, maxTime, minTime, runTime } = this;
+  compareWith(
+    other: Benchmark,
+    compareBy: CompareBy = CompareBy.Percent
+  ): number {
+    const {
+      error,
+      cycles,
+      hz,
+      meanTime,
+      medianTime,
+      standardDeviation,
+      maxTime,
+      minTime,
+      runTime
+    } = this;
 
     if (error) {
       return -1;
@@ -368,24 +417,26 @@ class Benchmark implements Benchmark {
     }
 
     switch (compareBy) {
-      case 'meanTime':
+      case "meanTime":
         return other.meanTime - meanTime;
-      case 'medianTime':
+      case "medianTime":
         return other.medianTime - medianTime;
-      case 'standardDeviation':
+      case "standardDeviation":
         return standardDeviation - other.standardDeviation;
-      case 'maxTime':
+      case "maxTime":
         return maxTime - other.maxTime;
-      case 'minTime':
+      case "minTime":
         return other.minTime - minTime;
-      case 'hz':
+      case "hz":
         return hz - other.hz;
-      case 'runTime':
+      case "runTime":
         return runTime - other.runTime;
-      case 'cycles':
+      case "cycles":
         return cycles - other.cycles;
-      case 'percent':
-        return Math.trunc(((100 / meanTime) * other.meanTime - 100) * 100) / 100;
+      case "percent":
+        return (
+          Math.trunc(((100 / meanTime) * other.meanTime - 100) * 100) / 100
+        );
       default:
         throw new Error(`Unknown compare field: ${compareBy}`);
     }
@@ -399,7 +450,11 @@ class Benchmark implements Benchmark {
     while (now() - startTime < sampleMaxTime) {
       const startCycleTime = now();
       this.cycles++;
-      const BeforeEachError = await runCallback(this, 'BeforeEachError', beforeEach);
+      const BeforeEachError = await runCallback(
+        this,
+        "BeforeEachError",
+        beforeEach
+      );
       if (BeforeEachError) {
         throw BeforeEachError;
       }
@@ -416,13 +471,23 @@ class Benchmark implements Benchmark {
           time = now() - start;
         }
       } catch (error) {
-        throw getError(error as Error, `Benchmark \`${this.name}\` failed to run \`fn\`: ${(error as Error).message}`, 'RunError');
+        throw getError(
+          error as Error,
+          `Benchmark \`${this.name}\` failed to run \`fn\`: ${
+            (error as Error).message
+          }`,
+          "RunError"
+        );
       }
 
       this.times.push(time);
       this.runTime += time;
 
-      const AfterEachError = await runCallback(this, 'AfterEachError', afterEach);
+      const AfterEachError = await runCallback(
+        this,
+        "AfterEachError",
+        afterEach
+      );
       if (AfterEachError) {
         throw AfterEachError;
       }
@@ -438,12 +503,15 @@ class Benchmark implements Benchmark {
     let maxTimeInMilliseconds = maxTime * 1000;
 
     try {
-      const beforeError = await runCallback(this, 'BeforeError', before);
+      const beforeError = await runCallback(this, "BeforeError", before);
       if (beforeError) {
         throw beforeError;
       }
 
-      while (this.samples < minSamples || this.totalTime < maxTimeInMilliseconds) {
+      while (
+        this.samples < minSamples ||
+        this.totalTime < maxTimeInMilliseconds
+      ) {
         this.samples++;
         await this.runSample();
       }
@@ -453,21 +521,35 @@ class Benchmark implements Benchmark {
 
       // Calculate the mean, median, margin of error, and standard deviation.
       this.meanTime = this.runTime / this.times.length;
-      this.medianTime = this.times.sort((a, b) => a - b)[Math.floor(this.times.length / 2)] || 0;
-      this.standardDeviation = Math.sqrt(this.times.map((t) => Math.pow(t - this.meanTime, 2)).reduce((a, b) => a + b, 0) / this.times.length);
+      this.medianTime =
+        this.times.sort((a, b) => a - b)[Math.floor(this.times.length / 2)] ||
+        0;
+      this.standardDeviation = Math.sqrt(
+        this.times
+          .map((t) => Math.pow(t - this.meanTime, 2))
+          .reduce((a, b) => a + b, 0) / this.times.length
+      );
 
       // Calculate the max, min, and average times.
       this.maxTime = this.times.reduce((max, time) => Math.max(max, time), 0);
-      this.minTime = this.times.reduce((min, time) => Math.min(min, time), Infinity);
+      this.minTime = this.times.reduce(
+        (min, time) => Math.min(min, time),
+        Infinity
+      );
 
-      const afterError = await runCallback(this, 'AfterError', after);
+      const afterError = await runCallback(this, "AfterError", after);
       if (afterError) {
         throw afterError;
       }
     } catch (error) {
       this.error = error as BenchmarkError;
 
-      const onErrorError = await runCallback(this, 'FatalError', onError, error);
+      const onErrorError = await runCallback(
+        this,
+        "FatalError",
+        onError,
+        error
+      );
       if (onErrorError) {
         throw onErrorError;
       }
@@ -482,15 +564,23 @@ type SuiteOptions = {
   // The minimum number of samples that must be taken.
   minSamples: number;
   // A function to be run once before each benchmark run
-  beforeEach?: (benchmark: Benchmark, i: number) => Promise<void> | void;
+  beforeEach?: (
+    this: Suite,
+    benchmark: Benchmark,
+    i: number
+  ) => Promise<void> | void;
   // A function to be run once after each benchmark run
-  afterEach?: (benchmark: Benchmark, i: number) => Promise<void> | void;
+  afterEach?: (
+    this: Suite,
+    benchmark: Benchmark,
+    i: number
+  ) => Promise<void> | void;
   // A function to be run once after the suite completes
-  after?: () => Promise<void> | void;
+  after?: (this: Suite) => Promise<void> | void;
   // A function to be run once before the suite starts
-  before?: () => Promise<void> | void;
+  before?: (this: Suite) => Promise<void> | void;
   // A function to be run if an error occurs.
-  onError?: (error: BenchmarkError) => Promise<void> | void;
+  onError?: (this: Suite, error: BenchmarkError) => Promise<void> | void;
 };
 
 interface JsonSuite {
@@ -502,7 +592,10 @@ interface JsonSuite {
   benchmarks: JsonBenchmark[];
 }
 
-type SuiteConstructor = (name: string, options?: Partial<SuiteOptions>) => Suite;
+type SuiteConstructor = (
+  name: string,
+  options?: Partial<SuiteOptions>
+) => Suite;
 
 interface Suite {
   readonly defaults: {
@@ -519,14 +612,24 @@ interface Suite {
   benchmarks: Benchmark[];
 
   constructor: SuiteConstructor;
-  add(name: string, optionsOrFn: (Partial<BenchmarkOptions> & { fn: BenchmarkFunction }) | BenchmarkFunction, options: Partial<BenchmarkOptions>): Benchmark;
+  add(
+    name: string,
+    optionsOrFn:
+      | (Partial<BenchmarkOptions> & { fn: BenchmarkFunction })
+      | BenchmarkFunction,
+    options: Partial<BenchmarkOptions>
+  ): Benchmark;
   toJSON(): JsonSuite;
   run(): Promise<void>;
 
   getSortedBenchmarksBy(sortedBy: CompareBy): Benchmark[];
   getFastest(sortedBy: CompareBy): Benchmark;
   getSlowest(sortedBy: CompareBy): Benchmark;
-  compareFastestWithSlowest(compareBy: CompareBy): { fastest: Benchmark; slowest: Benchmark; by: number };
+  compareFastestWithSlowest(compareBy: CompareBy): {
+    fastest: Benchmark;
+    slowest: Benchmark;
+    by: number;
+  };
 }
 
 class Suite implements Suite {
@@ -560,13 +663,17 @@ class Suite implements Suite {
       runTime,
       totalTime,
       passed: !error,
-      benchmarks: this.getSortedBenchmarksBy(CompareBy.MeanTime).map((benchmark) => benchmark.toJSON())
+      benchmarks: this.getSortedBenchmarksBy(CompareBy.MeanTime).map(
+        (benchmark) => benchmark.toJSON()
+      )
     };
   }
 
   add(
     name: string,
-    optionsOrFn: (Partial<BenchmarkOptions> & { fn: BenchmarkFunction }) | BenchmarkFunction,
+    optionsOrFn:
+      | (Partial<BenchmarkOptions> & { fn: BenchmarkFunction })
+      | BenchmarkFunction,
     options: Partial<BenchmarkOptions> = {}
   ): Benchmark {
     let opts = {
@@ -577,7 +684,7 @@ class Suite implements Suite {
       ...options
     } as BenchmarkOptions;
 
-    if (typeof optionsOrFn === 'function') {
+    if (typeof optionsOrFn === "function") {
       opts.fn = optionsOrFn;
     } else {
       opts = {
@@ -595,14 +702,20 @@ class Suite implements Suite {
     const { beforeEach, afterEach, after, before, onError } = this.options;
 
     try {
-      const beforeError = await runCallback(this, 'BeforeError', before);
+      const beforeError = await runCallback(this, "BeforeError", before);
       if (beforeError) {
         throw beforeError;
       }
 
       for (let i = 0, l = this.benchmarks.length; i < l; i++) {
         let benchmark = this.benchmarks[i];
-        const beforeEachError = await runCallback(this, 'BeforeEachError', beforeEach, benchmark, i);
+        const beforeEachError = await runCallback(
+          this,
+          "BeforeEachError",
+          beforeEach,
+          benchmark,
+          i
+        );
         if (beforeEachError) {
           throw beforeEachError;
         }
@@ -611,20 +724,31 @@ class Suite implements Suite {
         this.runTime += benchmark.runTime;
         this.totalTime += benchmark.totalTime;
 
-        const afterEachError = await runCallback(this, 'AfterEachError', afterEach, benchmark, i);
+        const afterEachError = await runCallback(
+          this,
+          "AfterEachError",
+          afterEach,
+          benchmark,
+          i
+        );
         if (afterEachError) {
           throw afterEachError;
         }
       }
 
-      const afterError = await runCallback(this, 'AfterError', after);
+      const afterError = await runCallback(this, "AfterError", after);
       if (afterError) {
         throw afterError;
       }
     } catch (error) {
       this.error = error as BenchmarkError;
 
-      const onErrorError = await runCallback(this, 'FatalError', onError, error);
+      const onErrorError = await runCallback(
+        this,
+        "FatalError",
+        onError,
+        error
+      );
       if (onErrorError) {
         throw onErrorError;
       }
@@ -652,7 +776,8 @@ class Suite implements Suite {
   }
 
   compareFastestWithSlowest(compareBy: CompareBy) {
-    let sortBy = compareBy === CompareBy.Percent ? CompareBy.MeanTime : compareBy;
+    let sortBy =
+      compareBy === CompareBy.Percent ? CompareBy.MeanTime : compareBy;
     const fastest = this.getFastest(sortBy);
     const slowest = this.getSlowest(sortBy);
 
@@ -665,6 +790,3 @@ class Suite implements Suite {
 }
 
 Benchmark.Suite = Suite;
-
-// Export the Benchmark class.
-export default Benchmark;

@@ -4,10 +4,14 @@
   "description": "A benchmarking library that supports async hooks and benchmarks by default.",
   "source": "lib/index.ts",
   "main": "dist/index.min.js",
-  "module": "dist/index.min.js",
+  "module": "dist/index.mjs",
   "unpkg": "dist/index.min.js",
   "browser": "dist/index.min.js",
-  "types": "types/lib/index.d.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.js"
+  },
   "repository": "git@github.com:Masquerade-Circus/buffalo-bench.git",
   "author": "Masquerade <christian@masquerade-circus.net>",
   "license": "Apache-2.0",
@@ -15,7 +19,7 @@
   "files": [
     "dist",
     "lib",
-    "register.js"
+    "tsconfig.json"
   ],
   "keywords": [
     "buffalo-bench",
@@ -30,29 +34,32 @@
     "perf"
   ],
   "scripts": {
-    "dev": "nodemon -e js,ts -w ./bench -w ./lib --exec 'yarn test'",
-    "test": "node ./index.js",
+    "dev": "nodemon -e js,ts -w ./tests -w ./lib --exec 'yarn test'",
+    "test": "node --require ts-node/register tests/index.ts",
+    "test-cjs": "node tests/index.cjs",
+    "test-mjs": "node tests/index.mjs",
+    "test-min": "node tests/index.min.js",
+    "test-all": "yarn test && yarn test-cjs && yarn test-mjs && yarn test-min",
     "build": "node ./build.js",
     "remark": "remark . -o",
     "commit": "git add . && git-cz",
     "release": "release-it --verbose",
     "release-test": "release-it --dry-run --verbose"
   },
-  "dependencies": {
-    "esbuild": "^0.13.13",
-    "pirates": "^4.0.1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@release-it/conventional-changelog": "^3.3.0",
-    "@types/node": "^16.11.7",
+    "@release-it/conventional-changelog": "^5.0.0",
+    "@types/node": "^18.0.0",
     "cz-conventional-changelog": "^3.3.0",
-    "nodemon": "^2.0.15",
-    "release-it": "^14.11.6",
-    "remark-cli": "^10.0.0",
-    "terser": "^5.9.0",
-    "tsc": "^2.0.3",
+    "esbuild": "^0.14.47",
+    "nodemon": "^2.0.18",
+    "release-it": "^15.1.0",
+    "remark-cli": "^11.0.0",
+    "terser": "^5.14.1",
+    "ts-node": "^10.8.1",
+    "tsc": "^2.0.4",
     "tsc-prog": "^2.2.1",
-    "typescript": "^4.4.4"
+    "typescript": "^4.7.4"
   },
   "config": {
     "commitizen": {
